@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# $FreeBSD$
+#
+# PROVIDE:	pyload
+# REQUIRE:	LOGIN
+# KEYWORD:	shutdown
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#  pyload_enable="YES"
+#  # Optional
+#  pyload_config="%%PREFIX%%/etc/pyload"
+#  pyload_flags="--daemon"
+#  pyload_pid="/var/run/pyload.pid
+
+. "/etc/rc.subr"
+
+PATH="$PATH:%%PREFIX%%/bin"
+
+name=pyload
+rcvar=${name}_enable
+load_rc_config $name
+
+: ${pyload_enable:="NO"}
+: ${pyload_flags:="--daemon"}
+: ${pyload_config:="%%PREFIX%%/etc/${name}"}
+: ${pyload_pid:="/var/run/${name}.pid"}
+
+required_files=${pyload_config}/pyload.conf
+pidfile=${pyload_pid}
+
+command_interpreter=%%PREFIX%%/bin/python
+command=%%PREFIX%%/bin/${name}
+command_args="--pidfile=${pidfile} --configdir=${pyload_config}"
+command_full="${command_interpreter} ${command} ${command_args}"
+
+start_cmd="${command_full} ${pyload_flags}"
+stop_cmd="${command_full} --quit"
+
+run_rc_command "$1"
